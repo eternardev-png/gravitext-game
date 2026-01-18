@@ -493,6 +493,7 @@ input[type="range"]::-moz-range-thumb {
     justify-content: center;
     z-index: 1000;
     transition: all 0.3s ease;
+    pointer-events: auto;
 }
 
 .tutorial.hidden {
@@ -507,6 +508,7 @@ input[type="range"]::-moz-range-thumb {
     padding: 2.5rem;
     max-width: 500px;
     width: 90%;
+    pointer-events: auto;
 }
 
 .tutorial-content h2 {
@@ -556,6 +558,7 @@ input[type="range"]::-moz-range-thumb {
 #closeTutorial {
     width: 100%;
     justify-content: center;
+    pointer-events: auto;
 }
 
 /* ===== RESPONSIVE ===== */
