@@ -499,6 +499,7 @@ input[type="range"]::-moz-range-thumb {
 .tutorial.hidden {
     opacity: 0;
     pointer-events: none;
+    visibility: hidden;
 }
 
 .tutorial-content {
