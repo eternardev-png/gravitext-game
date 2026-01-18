@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GRAVITEXT</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+</head>
+
+<body>
+    <!-- Cosmic Background -->
+    <div class="stars"></div>
+    <div class="stars2"></div>
+    <div class="stars3"></div>
+
+    <!-- Game Container -->
+    <div class="game-container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">GRAVITEXT</h1>
+            <div class="stats">
+                <span class="word-count">Слов: <span id="wordCount">0</span></span>
+            </div>
+        </header>
+
+        <!-- Canvas for Physics -->
+        <div id="canvasContainer"></div>
+
+        <!-- Input Area -->
+        <div class="input-container">
+            <input type="text" id="wordInput" class="word-input" placeholder="Введите слово и нажмите Enter..."
+                autocomplete="off" spellcheck="false">
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button id="gravityToggle" class="btn btn-primary">
+                <span class="btn-icon">🌌</span>
+                <span class="btn-text">GRAVITI OFF</span>
+            </button>
+
+            <button id="clearAll" class="btn btn-secondary">
+                <span class="btn-icon">🗑️</span>
+                <span class="btn-text">Очистить</span>
+            </button>
+
+            <button id="modeToggle" class="btn btn-secondary">
+                <span class="btn-icon">🎮</span>
+                <span class="btn-text">Режим</span>
+            </button>
+
+            <button id="achievementsToggle" class="btn btn-secondary">
+                <span class="btn-icon">🏆</span>
+                <span class="btn-text">Достижения</span>
+            </button>
+
+            <button id="musicToggle" class="btn btn-secondary">
+                <span class="btn-icon">🎵</span>
+                <span class="btn-text">Музыка</span>
+            </button>
+
+            <button id="challengesToggle" class="btn btn-secondary">
+                <span class="btn-icon">🎯</span>
+                <span class="btn-text">Челленджи</span>
+            </button>
+        </div>
+
+        <!-- Gravity Controls -->
+        <div class="gravity-controls">
+            <div class="control-group">
+                <label>Сила гравитации</label>
+                <input type="range" id="gravityStrength" min="0" max="2" step="0.1" value="1">
+                <span id="gravityValue">1.0</span>
+            </div>
+
+            <div class="control-group">
+                <label>Направление</label>
+                <div class="direction-buttons">
+                    <button class="dir-btn" data-direction="up">↑</button>
+                    <button class="dir-btn active" data-direction="down">↓</button>
+                    <button class="dir-btn" data-direction="left">←</button>
+                    <button class="dir-btn" data-direction="right">→</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Selection Panel -->
+        <div id="modePanel" class="mode-panel hidden">
+            <h3>Выберите режим</h3>
+            <div class="mode-buttons">
+                <button class="mode-btn active" data-mode="free">
+                    <span class="mode-icon">🎨</span>
+                    <span class="mode-name">Свободный</span>
+                    <span class="mode-desc">Создавай и играй</span>
+                </button>
+                <button class="mode-btn" data-mode="poet">
+                    <span class="mode-icon">✍️</span>
+                    <span class="mode-name">Поэт</span>
+                    <span class="mode-desc">Составь фразу</span>
+                </button>
+                <button class="mode-btn" data-mode="tower">
+                    <span class="mode-icon">🏗️</span>
+                    <span class="mode-name">Башня</span>
+                    <span class="mode-desc">Построй выше всех</span>
+                </button>
+                <button class="mode-btn" data-mode="chaos">
+                    <span class="mode-icon">🌪️</span>
+                    <span class="mode-name">Хаос</span>
+                    <span class="mode-desc">Случайная гравитация</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Achievements Panel -->
+        <div id="achievementsPanel" class="achievements-panel hidden">
+            <div class="panel-header">
+                <h3>🏆 Достижения</h3>
+                <button id="closeAchievements" class="close-btn">✕</button>
+            </div>
+
+            <div class="achievements-progress">
+                <div class="progress-text">
+                    Разблокировано: <span id="achievementsUnlocked">0</span> / <span id="achievementsTotal">16</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="achievementsProgressBar" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div id="achievementsList" class="achievements-list">
+                <!-- Достижения будут добавлены динамически через JS -->
+            </div>
+        </div>
+
+        <!-- Challenges Panel -->
+        <div id="challengesPanel" class="achievements-panel hidden">
+            <div class="panel-header">
+                <h3>🎯 Ежедневные челленджи</h3>
+                <button id="closeChallenges" class="close-btn">✕</button>
+            </div>
+
+            <div class="achievements-progress">
+                <div class="progress-text">
+                    Выполнено: <span id="challengesCompleted">0</span> / <span id="challengesTotal">3</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="challengesProgressBar" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div id="challengesList" class="achievements-list">
+                <!-- Челленджи будут добавлены динамически через JS -->
+            </div>
+        </div>
+
+        <!-- Achievement Notification -->
+        <div id="achievementNotif" class="achievement-notif hidden">
+            <span class="achievement-icon">🏆</span>
+            <span class="achievement-text"></span>
+        </div>
+
+        <!-- Tutorial Overlay -->
+        <div id="tutorial" class="tutorial">
+            <div class="tutorial-content">
+                <h2>Добро пожаловать в GRAVITEXT!</h2>
+                <div class="tutorial-steps">
+                    <div class="tutorial-step">
+                        <span class="step-number">1</span>
+                        <p>Введите слово и нажмите <strong>Enter</strong></p>
+                    </div>
+                    <div class="tutorial-step">
+                        <span class="step-number">2</span>
+                        <p>Перетаскивайте блоки мышью или пальцем</p>
+                    </div>
+                    <div class="tutorial-step">
+                        <span class="step-number">3</span>
+                        <p>Используйте <strong>GRAVITI OFF</strong> для левитации</p>
+                    </div>
+                    <div class="tutorial-step">
+                        <span class="step-number">4</span>
+                        <p>Попробуйте специальные слова: <strong>ВЗРЫВ, СТОП, РАДУГА</strong></p>
+                    </div>
+                </div>
+                <button id="closeTutorial" class="btn btn-primary">Начать игру!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/physics.js"></script>
+    <script src="js/blocks.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/modes.js"></script>
+    <script src="js/special-words.js"></script>
+    <script src="js/achievements.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/word-relationships.js"></script>
+    <script src="js/daily-challenges.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

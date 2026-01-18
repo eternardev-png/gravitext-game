@@ -1,0 +1,107 @@
+// Космическая музыка - замена для audio.js playBackgroundMusic()
+
+// Вставьте этот код вместо метода playBackgroundMusic() в audio.js
+
+playBackgroundMusic() {
+    if (!this.audioContext || this.musicOscillators.length > 0) return;
+
+    try {
+        // Создаём главный gain node для музыки
+        this.musicGainNode = this.audioContext.createGain();
+        this.musicGainNode.gain.value = this.musicVolume;
+        this.musicGainNode.connect(this.audioContext.destination);
+
+        // Космическая музыка с арпеджио
+        // Используем пентатонику для космического звучания
+        const pentatonicScale = [
+            130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63
+        ];
+
+        // Создаём базовый дрон (низкий космический гул)
+        const drone = this.audioContext.createOscillator();
+        const droneGain = this.audioContext.createGain();
+        const droneFilter = this.audioContext.createBiquadFilter();
+        
+        drone.type = 'sawtooth';
+        drone.frequency.value = 65.41; // C2
+        droneGain.gain.value = 0.15;
+        droneFilter.type = 'lowpass';
+        droneFilter.frequency.value = 200;
+        
+        drone.connect(droneFilter);
+        droneFilter.connect(droneGain);
+        droneGain.connect(this.musicGainNode);
+        drone.start();
+        
+        this.musicOscillators.push({ oscillator: drone, gain: droneGain });
+
+        // Создаём арпеджиатор (космические переливы)
+        let arpIndex = 0;
+        this.arpInterval = setInterval(() => {
+            if (!this.musicEnabled) {
+                clearInterval(this.arpInterval);
+                return;
+            }
+
+            const freq = pentatonicScale[arpIndex % pentatonicScale.length];
+            
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+            const filter = this.audioContext.createBiquadFilter();
+            
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            
+            filter.type = 'lowpass';
+            filter.frequency.value = 2000;
+            filter.Q.value = 5;
+            
+            gain.gain.setValueAtTime(0.08, this.audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.8);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.musicGainNode);
+            
+            osc.start(this.audioContext.currentTime);
+            osc.stop(this.audioContext.currentTime + 0.8);
+            
+            arpIndex++;
+        }, 400); // Каждые 400мс новая нота
+
+        // Добавляем космический пад (медленно меняющиеся аккорды)
+        const createPad = (freq, delay = 0) => {
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+            const filter = this.audioContext.createBiquadFilter();
+            
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            
+            filter.type = 'lowpass';
+            filter.frequency.value = 800;
+            
+            const startTime = this.audioContext.currentTime + delay;
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.06, startTime + 2);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.musicGainNode);
+            
+            osc.start(startTime);
+            
+            this.musicOscillators.push({ oscillator: osc, gain: gain });
+        };
+
+        // Создаём пад-аккорд
+        createPad(261.63, 0);  // C4
+        createPad(329.63, 0.5); // E4
+        createPad(392.00, 1);   // G4
+
+        this.musicEnabled = true;
+        console.log('🎵 Космическая музыка запущена');
+    } catch (e) {
+        console.error('Ошибка запуска музыки:', e);
+    }
+}
